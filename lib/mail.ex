@@ -223,8 +223,6 @@ defmodule Mail do
               {:cont, List.insert_at(acc, -1, {filename, message.body})}
           end
 
-          {:cont, List.insert_at(acc, -1, {filename, message.body})}
-
         false ->
           {:cont, acc}
       end
