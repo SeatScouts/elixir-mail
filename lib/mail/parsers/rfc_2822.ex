@@ -24,7 +24,7 @@ defmodule Mail.Parsers.RFC2822 do
   end
 
   def parse(content),
-    do: content |> String.split("\r\n") |> Enum.map(&String.trim_trailing/1) |> parse
+    do: content |> String.split("\r\n") |> Enum.map(&trim_trailing_non_empty/1) |> parse
 
   defp extract_headers(list, headers \\ [])
 
@@ -410,7 +410,7 @@ defmodule Mail.Parsers.RFC2822 do
   defp join_body(lines, acc \\ [])
   defp join_body([], acc), do: acc |> Enum.reverse() |> Enum.join("\r\n")
   defp join_body([""], acc), do: acc |> Enum.reverse() |> Enum.join("\r\n")
-  defp join_body([head | tail], acc), do: join_body(tail, [head | acc])
+  defp join_body([head | tail], acc), do: join_body(tail, [String.trim_trailing(head) | acc])
 
   defp extract_parts(lines, boundary, acc \\ [], parts \\ nil)
 
@@ -458,5 +458,9 @@ defmodule Mail.Parsers.RFC2822 do
     body = String.trim_trailing(body)
     transfer_encoding = Mail.Message.get_header(message, "content-transfer-encoding")
     Mail.Encoder.decode(body, transfer_encoding)
+  end
+
+  defp trim_trailing_non_empty(s) do
+    if String.match?(s, ~r/\H/), do: String.trim_trailing(s), else: s
   end
 end
